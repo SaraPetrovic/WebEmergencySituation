@@ -1,0 +1,3 @@
+1;VOLUNTEER;sara;123;Sara;Petrovic;0655214922;sara@gmail.com;jNNT4LE.jpg;2;false
+2;ADMIN;pera;123;Pera;Petrovic;0655214922;pera@gmail.com;jNNT4LE.jpg;0;false 
+3;VOLUNTEER;ana;123;Ana;Petrovic;0655214922;anap@gmail.com;jNNT4LE.jpg;2;false

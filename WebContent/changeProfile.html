@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Insert title here</title>
+	<meta charset="utf-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	  
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<link href="css/login.css" rel="stylesheet">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.9.0/validator.js"></script>
+	<script src="js/signup.js"></script>
+	<script src="js/sweetAlert.js"></script>
+	<link href="css/sweetAlert.css" rel="stylesheet">
+	<script src="js/profile.js"></script>
+	<script src="js/uploadImage.js"></script>
+	
+	<style>
+		label, legend, input, h1, a {
+			font-family: "Comic Sans MS", cursive, sans-serif;
+		}
+		.topnav {
+			overflow: hidden;
+			background-color: #FFFFFF;
+		}
+		
+		.topnav a {
+			float: left;
+			color: #000000;
+			text-align: center;
+			padding: 14px 16px;
+			text-decoration: none;
+			font-size: 17px;
+		}
+		
+		.topnav a:hover {
+			background-color: #F5F5F5;
+			color: black;
+		}
+		
+		.topnav a.active {
+			background-color: #F0F8FF;
+			color: black;
+		}
+	</style>
+	
+</head>
+<body>
+<div class="container">
+	<div class="row">
+		<div class="col-md-6"></div>
+		<div class="topnav">
+		  <a href="profile.html">Home</a>
+		  <a id="viewAreas" href="areas.html">Areas</a>
+		  <a id="viewVolunteers" href="volunteers.html">Volunteers</a>
+		  <a id="changeProfile" href="changeProfile.html" class="active">Change profile</a>
+		  <a id="logout" href="index.html" onclick="logout();">Log Out</a>
+		</div>
+	</div>
+
+	<div class="row" style="background-color:#F0F8FF; margin-top:10px; margin-bottom:20px;">
+	
+		<div class="col-md-4" style="border-radius:6px;padding:15px;margin-left:50px;">
+		<div class="col-md-4" style="border-radius:6px;padding:15px;margin-left:50px;">
+			<input type="image" id="profileImage" src="" alt="Profile picture" style="width:200px;height:200px;">
+    		<button id="uploadPhoto" class="btn btn-primary" data-toggle="modal" data-target="#uploadPhotoModal" >Upload photo</button>
+		</div>
+		
+		<div class="col-sm-7 col-md-7">
+		<div class="changeProfileform" style="max-width: 80%;">
+   				<div class="panel">
+	   				<div class="row">
+	   					<h1><label id="title"></label></h1>&nbsp;&nbsp;
+	   					<label id="active"></label>
+	   				</div>
+   				</div>
+				  <form method="post" class="profileForm" id="profileForm" style="align:center">
+				    <fieldset>
+				      <legend> You can change your profile information </legend>
+				      <input type="hidden" id="id">
+				      <div class="form-group">
+				        <div class="col-md-6  inputGroupContainer">
+				            <input id="nameChange" name="name" placeholder="First Name" class="form-control"  type="text" required>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-6  inputGroupContainer">
+				          <input id="lastNameChange" name="lastName" placeholder="Last Name" class="form-control"  type="text" required>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-6  inputGroupContainer">
+				            <input id="usernameChange" name="username" placeholder="Username" class="form-control"  type="text" required>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-6  inputGroupContainer">
+				          <input id="passwordChange" name="password" placeholder="Password" class="form-control"  type="password" required>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-6  inputGroupContainer">
+				          <input id="confirmPasswordChange" name="confirmPassword" placeholder="Confirm password" class="form-control"  type="password" required>
+				        </div>
+				      </div>
+				       <div class="form-group">
+				        <div class="col-md-6  inputGroupContainer">
+				          <input id="phoneNumberChange" name="phoneNumber" placeholder="Phone number" class="form-control"  type="number" required>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-6  inputGroupContainer">
+				          <input id="emailChange" name="email" placeholder="E-Mail Address" class="form-control"  type="text" required>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-6  inputGroupContainer">
+				        	<select class="form-control" id="areaNameChange">
+				        		<option value=""></option>
+				        	</select>  
+				        </div>
+				      </div>
+				      <input type="submit" id="signupButton" class="btn btn-success" style="margin-left:300px" value="Apply changes"/>
+				    </fieldset>
+				  </form>
+			</div>
+	  </div>
+  </div>
+  </div>
+  
+   <!-- Modal Upload Profile Picture-->
+	 <div class="modal fade" id="uploadPhotoModal" role="dialog">
+	   <div class="modal-dialog">
+	     <div class="modal-content">
+	      
+	      <!-- Modal Header -->
+	        <div class="modal-header">
+	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	          	<h2 class="modal-title">Choose picture from your PC</h2>
+	        </div>
+	      
+			<!-- Modal body -->
+			  <div class="modal-body"> 			
+			    	<form role="form" id="formItem">
+			   		   <fieldset>
+					
+						   <div id="image-preview-div" style="display: none">
+					            <label for="exampleInputFile">Selected image:</label>
+					            <br>
+					            <img id="preview-img">
+					        </div>
+					        <div class="form-group">
+					            <input type="file" name="file" id="file" required>
+					            <input id="itemImage" name="itemImage" type="hidden" value="">
+					        </div>
+	
+					        <br>
+					        <div class="alert alert-info" id="loading" style="display: none;" role="alert">
+					          Uploading image...
+						        <div class="progress">
+							    	<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+							    	</div>
+							    </div>
+						    </div>
+						    <div id="message"></div>
+						    
+		    			<div class="col-xs-12 col-sm-12 col-md-12">
+		    				<button  id="uploadImage" type="button" class="btn btn-info">Add item</button>
+		    			</div>
+						
+					  </fieldset>
+			    	</form>
+			    </div>
+	    	 </div>
+	   	  </div>
+	    </div>	
+
+	 
+<script>
+	$('#uploadImage').click( function() {
+		//generete random image id
+		  var extension = $('#file').val().split(/[. ]+/).pop();
+		$('#itemImage').val( Math.random().toString(36).substr(2, 9) + "." + extension);
+	    $('#message').empty();
+	    $('#loading').show();
+	
+	    $.ajax({
+	      url: "api/uploadProfileImage",
+	      type: "POST",
+	      data: new FormData($("#formItem")[0]),
+	      contentType: false,
+	      cache: false,
+	      processData: false,
+	      success: function(user)
+	      {
+	    	  $("#profileImage").attr('src', 'images/default-profile-picture.jpg');
+	    	$("#profileImage").attr('src', 'images/' + user.profilePicture);
+	
+			$('#photoModal').modal('toggle');
+	        $('#loading').hide();
+	  
+	      }
+	    });
+	});
+	$('#file').change(function() {
+	
+	    $('#message').empty();
+	
+	    var file = this.files[0];
+	    var match = ["image/jpeg", "image/png", "image/jpg"];
+	
+	    if ( !( (file.type == match[0]) || (file.type == match[1]) || (file.type == match[2]) ) )
+	    {
+	      noPreview();
+	
+	      $('#message').html('<div class="alert alert-warning" role="alert">Unvalid image format. Allowed formats: JPG, JPEG, PNG.</div>');
+	
+	      return false;
+	    }
+	
+	    if ( file.size > maxsize )
+	    {
+	      noPreview();
+	
+	      $('#message').html('<div class=\"alert alert-danger\" role=\"alert\">The size of image you are attempting to upload is ' + (file.size/1024).toFixed(2) + ' KB, maximum size allowed is ' + (maxsize/1024).toFixed(2) + ' KB</div>');
+	
+	      return false;
+	    }
+	
+	    $('#upload-button').removeAttr("disabled");
+	
+	    var reader = new FileReader();
+	
+	    reader.onload = selectImage;
+	    reader.readAsDataURL(this.files[0]);
+	
+	});
+</script>
+  <script>
+  
+	 $.ajax({
+		type: "GET",
+		url: "../WebProject/rest/areas/getAllAreas",
+		success: function(areas){
+			$("#areaNameChange").empty();
+			var select = document.getElementById("areaNameChange");
+			$.each(areas, function(i, area){
+				var option = document.createElement("OPTION");
+				select.add(option);
+				option.value = area.name;
+				option.text = area.name;
+			});
+		}
+	});
+	 
+ 	$.ajax({
+ 		type: "GET",
+		url: '../WebProject/rest/users/loggedUser',
+		success: function(user){
+			if(user.userType == "VOLUNTEER"){
+				document.getElementById("viewAreas").style.display = 'none';
+				document.getElementById("viewVolunteers").style.display = 'none';
+			}
+			var active;
+			if(user.blocked == false){
+				active = "active";
+			}else{
+				active = "blocked"
+			}
+			document.getElementById("title").innerHTML  = user.name + " " + user.surname + " ";
+			document.getElementById("active").innerHTML = active;
+			
+			document.getElementById("id").value = user.id;
+			document.getElementById("nameChange").value = user.name;
+			document.getElementById("lastNameChange").value = user.surname;
+			document.getElementById("usernameChange").value = user.username;
+			document.getElementById("passwordChange").value = user.password;
+			document.getElementById("confirmPasswordChange").value = user.password;
+			document.getElementById("phoneNumberChange").value = user.phoneNumber;
+			document.getElementById("emailChange").value = user.email;
+			document.getElementById("profileImage").src = "images/" + user.photo;
+			if(user.area != null){
+				document.getElementById("areaNameChange").value = user.area.name;	
+			}else{
+				document.getElementById("areaNameChange").style.display = "none";
+				document.getElementById("areaNameChange").value = null;
+			}
+			
+			
+		}
+	});
+
+  </script>
+</body>
+</html>

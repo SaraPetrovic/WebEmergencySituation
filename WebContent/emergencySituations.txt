@@ -1,0 +1,2 @@
+1;Novi Sad;Novi Sad;Opis;22/08/2018 13:09:20;Bulevar kralja Petra I 47;2;ORANGE; ;true;1
+2;Novi Sad;Novi Sad;Opis;31/1/2018 13:09:21;Jevrejska 10;1;RED; ;true;1

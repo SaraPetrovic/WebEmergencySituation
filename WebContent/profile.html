@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="ISO-8859-1">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="js/area.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/sweetAlert.js"></script>
+  <link href="css/sweetAlert.css" rel="stylesheet">
+  <script src="js/signup.js"></script>
+  <script src="js/profile.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	
+	<style>
+	h1, input, button, a, h2, p, h4, legend, label, span, div, h3 {
+		font-family: "Comic Sans MS", cursive, sans-serif;
+	}
+	.info{
+		color:red;
+	}
+	.big{
+			width: 1.5em; height: 1.5em;
+		}
+	textarea {
+		max-width: 350px;
+		max-height:90px;
+		min-width: 350px;
+		min-height:50px;
+		overflow-y: scroll;
+	}
+	.topnav {
+		overflow: hidden;
+		background-color: #FFFFFF;
+	}
+	
+	.topnav a {
+		float: left;
+		color: #000000;
+		text-align: center;
+		padding: 14px 16px;
+		text-decoration: none;
+		font-size: 17px;
+	}
+	
+	.topnav a:hover {
+		background-color: #F5F5F5;
+		color: black;
+	}
+	
+	.topnav a.active {
+		background-color: #F0F8FF;
+		color: black;
+	}
+	#panelBody {
+	  min-height: 200px;
+	  max-height: 290px;
+	  overflow-y: scroll;
+	}
+	#commentBody {
+	  min-height: 40px;
+	  max-height: 60px;
+	  overflow-y: scroll;
+	}
+	</style>
+
+</head>
+<body>
+	<div class="row">
+		<div class="col-md-6">
+			<h3 style="margin-left:20px;"><span id="loggeduser"></span></h3>
+		</div>
+		<div class="topnav">
+		  <a class="active" href="profile.html">Home</a>
+		  <a id="viewAreas" href="areas.html">Areas</a>
+		  <a id="viewVolunteers" href="volunteers.html">Volunteers</a>
+		  <a id="changeProfile" href="changeProfile.html">Change profile</a>
+		  <a id="logout" href="index.html" onclick="logout();">Log Out</a>
+		</div>
+	</div>
+	<div style="background-color:#F0F8FF; margin-top:10px;margin-bottom:20px;">
+	  <div class="container">
+	   <div class="row">
+	    <select id="filterOption" onchange="getfilterOption();">
+	    	<option value="date">Date</option>
+	    	<option value="urgency">Urgency</option>
+	    	<option value="area">Area</option>
+	    </select>
+	    <span id="chooseCriteria">
+	    	<select id="criteriaSelect">
+	    		
+	    	</select>
+	    </span>
+	    <button onclick="filter();">Filter</button>
+	    <select id="searchSelect" style="margin-left:65px;">
+	    	<option value="area">Area name</option>
+	    	<option value="township">Township name</option>
+	    	<option value="description">Description</option>
+	    	<option value="volunteer">Volunteer</option>
+	    	<option value="withoutvolunteer">Emergency without a volunteer</option>
+	    </select>
+	    <input id="searchInput" type="text"/>
+	    <button onclick="search();">Search</button>
+	    <button style="margin-left:70px;" onclick="filterSearch();">Filter + Search</button>
+	  	<h3><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addEmergencyModal" onclick="fillVolunteersSelect();checkUser();" style="margin-left:1000px;margin-top:10px;">Add emergency situation</button></h3>
+	   </div>
+		<h2 style="margin-left:60px;">Emergency situations</h2>
+		<div id="emergencies" class="panel-group" style="margin-top:5px;">
+		 
+		</div>
+	  </div>
+	</div>
+	
+	<script>
+		$.ajax({
+			type: "GET",
+			url: "../WebProject/rest/users/loggedUser",
+			success: function(user){
+				document.getElementById("loggeduser").innerHTML = user.name + ' ' + user.surname;
+				$.ajax({
+					type: "GET",
+					url: "../WebProject/rest/emergencies/getAll",
+					success: function(ems){
+						if(user.userType == "VOLUNTEER"){
+							document.getElementById("viewAreas").style.display = 'none';
+							document.getElementById("viewVolunteers").style.display = 'none';
+							
+							$.each(ems, function(i, em){
+						
+								if(em.volunteer != null && em.volunteer.username == user.username){
+									var volunteer = em.volunteer.name + ' ' + em.volunteer.surname + '(username: ' + em.volunteer.username + ')';
+									
+									var date = em.datetime.split("T")[0];
+									var time = ((em.datetime.split("T")[1]).split("Z")[0]).split(".")[0];
+									
+									var panel = "";
+									if(em.urgency == "BLUE"){
+										panel += '<div class="panel panel-info col-md-6" style="width:90%;margin-left:60px;">';
+									}else if(em.urgency == "ORANGE"){
+										panel += '<div class="panel panel-warning col-md-6" style="width:90%;margin-left:60px;">';
+									}else{
+										panel += '<div class="panel panel-danger col-md-6" style="width:90%;margin-left:60px;">';
+									}
+									panel += '<div class="panel-heading">Date and time: ' + date + " " + time + '</div><div class="panel-body"><div class="row"><div class="col-md-6"><label>Address: ' + em.address + '<br>Area: ' + em.area.name + '<br>Place of emergency: ' + em.placeName + '<br>Description: ' + em.description + '<br>Volunteer: ' + volunteer + '</label></div></div></div><br>';
+									panel += '<div class="row"><div class="col-sm-9"><textarea id="text' + em.id + '" rows="2" placeholder="Add a comment..."></textarea>&nbsp;<button onclick="addComment(\'' + em.id + '\')" class="btn btn-success green"><i class="fa fa-share"></i>Post</button></div></div><br>';
+									panel += '<div id="body' + em.id + '"></div></div></div>';
+									$("#emergencies").append(panel);
+									
+									$.ajax({
+										type: "GET",
+										url: "../WebProject/rest/comments/emergency/" + em.id,
+										success: function(comments){
+											$.each(comments, function(i, comment){
+												var date = comment.date.split("T")[0];
+												var time = ((comment.date.split("T")[1]).split("Z")[0]).split(".")[0];
+												
+												var com = '';
+												com += '<div class="row"><div class="col-sm-1"><div class="thumbnail"><img class="img-responsive user-photo" src="images/' + comment.user.photo + '"></div></div>';
+												com += '<div class="col-sm-9"><div class="panel panel-default"><div class="panel-heading"><strong>' + comment.user.name + ' ' + comment.user.surname + '</strong><span class="text-muted"> commented at ' + time + ' ' + date + '</span></div><div class="panel-body" id="commentBody">' + comment.text + '</div></div></div></div><br>';
+												$("#body" + em.id).append(com);
+											});
+										}
+									});
+								}
+							});
+						}else{
+							$.each(ems, function(i, em){
+								var volunteer = "";
+								if(em.volunteer != null){
+									volunteer = em.volunteer.name + ' ' + em.volunteer.surname + '(username: ' + em.volunteer.username + ')';
+								}
+								var date = em.datetime.split("T")[0];
+								var time = ((em.datetime.split("T")[1]).split("Z")[0]).split(".")[0];
+								
+								var panel = "";
+								if(em.urgency == "BLUE"){
+									panel += '<div class="panel panel-info col-md-6" style="width:90%;margin-left:60px;">';
+								}else if(em.urgency == "ORANGE"){
+									panel += '<div class="panel panel-warning col-md-6" style="width:90%;margin-left:60px;">';
+								}else{
+									panel += '<div class="panel panel-danger col-md-6" style="width:90%;margin-left:60px;">';
+								}
+								panel += '<div class="panel-heading">Date and time: ' + date + " " + time + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Archived&nbsp;<input type="radio" id="archived" name="archived" class="big" value="archived" onclick="changeToArchived(' + em.id + ');"/>';
+								panel += '<button id="listVolunteers" class="btn btn-primary" onclick="listVolunteers(\'' + em.area.name + ',' + em.id + '\');" data-toggle="modal" data-target="#changeVolunteerModal">Change volunteer</button></div><div class="panel-body"><div class="row"><div class="col-md-6"><label>Address: ' + em.address + '<br>Area: ' + em.area.name + '<br>Place of emergency: ' + em.placeName + '<br>Description: ' + em.description + '<br>Volunteer: ' + volunteer + '</label></div></div>';
+								panel += '<div class="row"><div class="col-sm-9"><textarea id="texta' + em.id + '" rows="2" placeholder="Add a comment..."></textarea>&nbsp;<button onclick="addCommenta(\'' + em.id + '\')" class="btn btn-success green"><i class="fa fa-share"></i>Post</button></div></div><br>';
+								panel += '<div id="bodya' + em.id + '"></div></div></div>';
+								$("#emergencies").append(panel);
+								
+								$.ajax({
+									type: "GET",
+									url: "../WebProject/rest/comments/emergency/" + em.id,
+									success: function(comments){
+										$.each(comments, function(i, comment){
+											var date = comment.date.split("T")[0];
+											var time = ((comment.date.split("T")[1]).split("Z")[0]).split(".")[0];
+											
+											var com = '';
+											com += '<div class="row"><div class="col-sm-1"><div class="thumbnail"><img class="img-responsive user-photo" src="images/' + comment.user.photo + '"></div></div>';
+											com += '<div class="col-sm-9"><div class="panel panel-default"><div class="panel-heading"><strong>' + comment.user.name + ' ' + comment.user.surname + '</strong><span class="text-muted"> commented at ' + time + ' ' + date + '</span></div><div class="panel-body" id="commentBody">' + comment.text + '</div></div></div></div><br>';
+											$("#bodya" + em.id).append(com);
+										});
+									}
+								});
+							});
+						}
+					}
+			 	});
+			}
+		});
+		
+		
+	</script>
+	
+	
+	<!-- MODALI -->
+	<div class="container">
+	  <!-- The Modal -->
+	  <div class="modal fade" id="openMapModal" role="dialog">
+	    <div class="modal-dialog">
+	      <div class="modal-content">
+	      
+	        <!-- Modal Header -->
+	        <div class="modal-header">
+	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	          	<div><h2 class="modal-title">Map</h2></div>
+	        </div>
+	        
+			<!-- Modal body -->
+			  <div class="modal-body">
+			   <div class="container">
+	          	<div class="col-md-7">
+					<div class="well" id="map" style="width:60%;height:220px;"> </div>
+				</div>
+			   </div>
+			  </div>
+			</div>
+		 </div>
+	   </div>
+	</div>
+	
+	<div class="container">
+	  <!-- The Modal -->
+	  <div class="modal fade" id="changeVolunteerModal" role="dialog">
+	    <div class="modal-dialog">
+	      <div class="modal-content">
+	      
+	        <!-- Modal Header -->
+	        <div class="modal-header">
+	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	          	<div><h2 class="modal-title">You can change volunteer</h2></div>
+	        </div>
+	        
+			<!-- Modal body -->
+			  <div class="modal-body">
+	          <form method="post" class="changeVolunteerForm" id="changeVolunteerForm" style="align:center" autocomplete="off" >
+			  	<fieldset>
+			  		<div class="form-group">
+				        <div class="col-md-12  inputGroupContainer">
+							<input type="hidden" id="emergencyId">  
+				            <span>Select volunteer: </span>
+					   		<select class="form-control" id="changeVolunteerSelect">
+							 	
+				  			</select><br>
+                        </div>
+				      </div>
+				    <button type="submit" id="changeVol" class="btn btn-success" style="margin-left:500px">Change</button>
+			  	</fieldset>
+			  </form>
+			  </div>
+			</div>
+		 </div>
+	   </div>
+	</div>
+	
+	<div class="container">
+	  <!-- The Modal -->
+	  <div class="modal fade" id="addEmergencyModal" role="dialog">
+	    <div class="modal-dialog">
+	      <div class="modal-content">
+	      
+	        <!-- Modal Header -->
+	        <div class="modal-header">
+	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	          	<div id="emergencyHeader"><h2 class="modal-title">Create a new emergency situation</h2></div>
+	        </div>
+	        
+			<!-- Modal body -->
+			  <div class="modal-body">
+	          <form method="post" class="emergencyForm" id="emergencyForm" style="align:center" autocomplete="off" >
+			  	<fieldset>
+          			 <div class="form-group">
+				        <div class="col-md-12  inputGroupContainer">
+				            <input id="placeName" name="placeName" placeholder="Name of the place where the emergency occurred" class="form-control"  type="text" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12  inputGroupContainer">
+				          <input id="township" name="township" placeholder="Township" class="form-control"  type="text" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12  inputGroupContainer">
+				      		<textarea id="desc" rows="4" cols="50" name="desc" placeholder="Description..."></textarea><br>
+				      	</div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12  inputGroupContainer">
+				            <input id="address" name="address" placeholder="Address" class="form-control"  type="text" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+					      <div class="row">
+					        <div class="col-md-6  inputGroupContainer">
+					            <label>Select area: </label>
+						   		<select class="form-control" id="areaSelect" onchange="fillVolunteersSelect();">
+								 	<option value=""></option>
+					  			</select><br>
+	                        </div>
+					        <div class="col-md-6  inputGroupContainer">
+					            <label>Select urgency: </label>
+						   		<select class="form-control" id="urgencySelect">
+								 	<option value="RED">RED</option>
+								 	<option value="ORANGE">ORANGE</option>
+								 	<option value="BLUE">BLUE</option>
+					  			</select><br>
+	                        </div>
+					      </div>
+				      </div>
+					  <div class="form-group">
+				        <div class="col-md-12  inputGroupContainer">
+				            <span>Select volunteer: </span><span id="info" class="info"> </span>
+					   		<select class="form-control" id="volunteersSelect">
+							 	
+				  			</select><br>
+                        </div>
+				      </div>
+				    <button type="submit" id="addEmergencyButton" class="btn btn-success" style="margin-left:500px">Add</button>
+			  	</fieldset>
+			  </form>
+	       	 </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	
+	<script>
+	 	$.ajax({
+	 		type: "GET",
+	 		url: "../WebProject/rest/areas/getAllAreas",
+	 		success: function(areas){
+	 			$("#areaSelect").empty();
+	 			var select = document.getElementById("areaSelect");
+	 			$.each(areas, function(i, area){
+	 				var option = document.createElement("OPTION");
+	 				select.add(option);
+	 				option.value = area.name;
+	 				option.text = area.name;
+	 			});
+	 		}
+	 	});	
+	 	
+ 	</script>
+	
+	<div class="container">
+	  <!-- The Modal -->
+	  <div class="modal fade" id="changeProfileModal" role="dialog">
+	    <div class="modal-dialog">
+	      <div class="modal-content">
+	      
+	        <!-- Modal Header -->
+	        <div class="modal-header">
+	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	        	<div id="profileHeader"><h2 class="modal-title">You can change your profile information</h2></div>
+	        </div>
+	        
+			<!-- Modal body -->
+			<div class="modal-body">
+				<form method="post" class="profileForm" id="profileForm" style="align:center" autocomplete="off">
+				    <fieldset>
+				      <div class="row">
+		   				<h1><label id="title"></label></h1>&nbsp;&nbsp;
+		   				<label id="active"></label>
+	   				  </div>
+				      <input type="hidden" id="id">
+				      <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				            <input id="nameChange" name="name" placeholder="First Name" class="form-control"  type="text" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				          <input id="lastNameChange" name="lastName" placeholder="Last Name" class="form-control"  type="text" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				            <input id="usernameChange" name="username" placeholder="Username" class="form-control"  type="text" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				          <input id="passwordChange" name="password" placeholder="Password" class="form-control"  type="password" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				          <input id="confirmPasswordChange" name="confirmPassword" placeholder="Confirm password" class="form-control"  type="password" required><br>
+				        </div>
+				      </div>
+				       <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				          <input id="phoneNumberChange" name="phoneNumber" placeholder="Phone number" class="form-control"  type="number" min="0600000000" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				          <input id="emailChange" name="email" placeholder="E-Mail Address" class="form-control"  type="text" required><br>
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				        	<select class="form-control" id="areaNameChange"><br>
+				        		<option value=""></option>
+				        	</select>  
+				        </div>
+				      </div>
+				      <div class="form-group">
+				        <div class="col-md-12 inputGroupContainer">
+				          <input id="photoChange" name="photo" placeholder="Photo" class="form-control"  type="file"><br>
+				        </div>
+				      </div>
+				      <input type="submit" id="signupButton" class="btn btn-success" style="margin-left:500px" value="Apply changes"/>
+				    </fieldset>
+				</form>
+			</div>
+		  </div>
+		</div>
+      </div>
+	</div>
+	
+  <script>
+	  $.ajax({
+			type: "GET",
+			url: "../WebProject/rest/areas/getAllAreas",
+			success: function(areas){
+				$("#areaNameChange").empty();
+				var select = document.getElementById("areaNameChange");
+				$.each(areas, function(i, area){
+					var option = document.createElement("OPTION");
+					select.add(option);
+					option.value = area.name;
+					option.text = area.name;
+				});
+			}
+	  });
+	  
+	 
+  </script>
+  
+</body>
+</html>
